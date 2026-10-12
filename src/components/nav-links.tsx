@@ -34,7 +34,7 @@ export function NavLinks({ variant }: { variant: "sidebar" | "bottom" }) {
               variant === "bottom" && ativo && "bg-transparent",
             )}
           >
-            <Icon className="size-5" />
+            <Icon className="size-5 text-foreground" />
             {label}
           </Link>
         );

@@ -32,7 +32,16 @@ export async function cadastrar(_: AuthState, formData: FormData): Promise<AuthS
     password: parsed.data.senha,
     options: { emailRedirectTo: `${SITE_URL}/login` },
   });
-  if (error) return { erro: "Não foi possível criar a conta" };
+  if (error) {
+    console.error("signUp:", error.code, error.status, error.message);
+    if (error.code === "user_already_exists") return { erro: "E-mail já cadastrado" };
+    if (error.code === "over_email_send_rate_limit" || error.status === 429) {
+      return { erro: "Muitas tentativas. Aguarde alguns minutos e tente de novo" };
+    }
+    if (error.code === "weak_password") return { erro: "Senha inválida" };
+    if (error.code === "email_address_invalid") return { erro: "E-mail inválido" };
+    return { erro: `Não foi possível criar a conta (${error.code ?? error.message})` };
+  }
   if (!data.session) {
     return { info: "Conta criada! Confirme seu e-mail para entrar." };
   }

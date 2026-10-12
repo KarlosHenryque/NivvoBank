@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { cadastroSchema, loginSchema } from "@/lib/validations/auth";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nivvobank.vercel.app";
+
 export type AuthState = { erro?: string; info?: string };
 
 export async function entrar(_: AuthState, formData: FormData): Promise<AuthState> {
@@ -28,6 +30,7 @@ export async function cadastrar(_: AuthState, formData: FormData): Promise<AuthS
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.senha,
+    options: { emailRedirectTo: `${SITE_URL}/login` },
   });
   if (error) return { erro: "Não foi possível criar a conta" };
   if (!data.session) {

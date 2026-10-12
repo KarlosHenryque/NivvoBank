@@ -67,10 +67,19 @@ test.describe("cadastro (só validações, não cria conta)", () => {
   test("senhas diferentes mostram erro", async ({ page }) => {
     await page.goto("/cadastro");
     await page.getByLabel("E-mail").fill("novo-e2e@example.com");
-    await page.getByLabel("Senha", { exact: true }).fill("senha123");
-    await page.getByLabel("Confirmar senha").fill("outra456");
+    await page.getByLabel("Senha", { exact: true }).fill("Senha@1234");
+    await page.getByLabel("Confirmar senha").fill("Outra@5678");
     await page.getByRole("button", { name: "Criar conta" }).click();
     await expect(page.locator("p[role=alert]")).toHaveText("As senhas não conferem");
+  });
+
+  test("senha fraca é rejeitada pelo servidor", async ({ page }) => {
+    await page.goto("/cadastro");
+    await page.getByLabel("E-mail").fill("novo-e2e@example.com");
+    await page.getByLabel("Senha", { exact: true }).fill("senhafraca1");
+    await page.getByLabel("Confirmar senha").fill("senhafraca1");
+    await page.getByRole("button", { name: "Criar conta" }).click();
+    await expect(page.locator("p[role=alert]")).toHaveText("A senha deve ter uma letra maiúscula");
   });
 
   test("link volta para o login", async ({ page }) => {

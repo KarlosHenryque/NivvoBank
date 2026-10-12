@@ -43,11 +43,16 @@ export function AuthForm({
             name="senha"
             type="password"
             required
-            minLength={6}
+            minLength={cadastro ? 8 : 6}
             autoComplete={cadastro ? "new-password" : "current-password"}
             className={inputClass}
           />
         </label>
+        {cadastro && (
+          <p className="-mt-2 text-xs text-muted-foreground">
+            Mínimo de 8 caracteres, com maiúscula, minúscula, número e símbolo.
+          </p>
+        )}
         {cadastro && (
           <label className="flex flex-col gap-1.5 text-sm font-medium">
             Confirmar senha
@@ -55,7 +60,7 @@ export function AuthForm({
               name="confirmarSenha"
               type="password"
               required
-              minLength={6}
+              minLength={8}
               autoComplete="new-password"
               className={inputClass}
             />

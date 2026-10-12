@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 256 256" role="img" aria-label="Logotipo branco sobre fundo laranja">
+  <rect width="256" height="256" rx="48" fill="#FF6B3D"/>
+  <g fill="#FFFFFF">
+    <path d="M41 196 V89 Q41 82 47 77 L83 50 Q89 45 96 50 L166 98 V141 L93 91 L69 109 V166 Z"/>
+    <path d="M89 117 L89 148 L158 195 Q166 201 174 195 L210 168 Q215 164 215 156 V53 L188 73 V150 L164 168 Z"/>
+  </g>
+</svg>

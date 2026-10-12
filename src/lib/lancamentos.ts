@@ -31,6 +31,14 @@ export function dividirValor(valor: number, n: number) {
   return Array.from({ length: n }, (_, i) => (i === n - 1 ? centavos - base * (n - 1) : base) / 100);
 }
 
+export type ModoValor = "parcela" | "total";
+
+export function calcularParcelas(valor: number, n: number, modo: ModoValor) {
+  const valores = modo === "total" ? dividirValor(valor, n) : Array.from({ length: n }, () => valor);
+  const total = valores.reduce((s, v) => s + Math.round(v * 100), 0) / 100;
+  return { valores, total, parcela: valores[0], ultima: valores[n - 1] };
+}
+
 export const brl = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 

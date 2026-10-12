@@ -113,7 +113,7 @@ export function CategoriasView({ categorias }: { categorias: CategoriaResumo[] }
               <input
                 name="cor"
                 type="color"
-                defaultValue={item?.cor ?? "#64748b"}
+                defaultValue={item?.cor ?? "#3b82f6"}
                 className="h-10 w-full cursor-pointer rounded-lg border border-input bg-background p-1"
               />
             </label>

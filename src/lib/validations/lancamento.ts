@@ -27,6 +27,7 @@ export const lancamentoEdicaoSchema = base;
 export const lancamentoSchema = base
   .extend({
     parcelado: z.boolean(),
+    modo_valor: z.enum(["parcela", "total"]).default("total"),
     repetir: z.boolean(),
     parcelas: z.preprocess(
       (v) => (v === "" || v == null ? 1 : v),

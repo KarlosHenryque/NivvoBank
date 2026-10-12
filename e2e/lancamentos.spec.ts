@@ -135,6 +135,26 @@ test.describe("receita e parcelamento", () => {
     await dialog(page).getByRole("button", { name: "Salvar", exact: true }).click();
     await expect(page.getByText("Lançamento criado")).toBeVisible();
     await expect(linha(page, nome)).toContainText("+");
+    await expect(linha(page, nome).getByRole("button", { name: "Pagar" })).toHaveCount(0);
+    await expect(linha(page, nome).getByText(/A pagar|Vencida|Paga/)).toHaveCount(0);
+  });
+
+  test("resumo do parcelamento nos dois modos", async ({ page }) => {
+    await abrirNovo(page);
+    await dialog(page).getByLabel("Valor").fill("120000");
+    await dialog(page).getByRole("switch", { name: "Parcelado?" }).click();
+    await dialog(page).getByLabel("Número de parcelas").fill("12");
+    const resumo = dialog(page).getByLabel("Resumo do parcelamento");
+    await expect(resumo).toContainText("100,00");
+    await expect(resumo).toContainText("1.200,00");
+    await dialog(page).getByText("Valor da parcela", { exact: true }).click();
+    await expect(resumo).toContainText("14.400,00");
+  });
+
+  test("tag A pagar em despesa pendente", async ({ page }) => {
+    const nome = unico("tag");
+    await criar(page, nome, "1000");
+    await expect(linha(page, nome).getByText(/A pagar|Vencida/)).toBeVisible();
   });
 
   test("parcela em 3x, valores somam o total e exclui as próximas", async ({ page }) => {

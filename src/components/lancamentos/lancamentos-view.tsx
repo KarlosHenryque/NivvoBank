@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { EstadoVazio } from "@/components/estado-vazio";
 import { Modal } from "@/components/modal";
 import { LancamentoForm } from "./lancamento-form";
+import { StatusTag } from "./status-tag";
 import { brl, dataBR, hojeBR, type Categoria, type Lancamento } from "@/lib/lancamentos";
 import { excluirLancamento, pagarLancamento } from "@/app/(app)/lancamentos/actions";
 
@@ -54,15 +55,8 @@ export function LancamentosView({
   const despesas = lancamentos.filter((l) => l.tipo === "despesa").reduce((s, l) => s + l.valor, 0);
   const saldo = receitas - despesas;
 
-  const badge = (l: Lancamento) => {
-    const [rotulo, cor] =
-      l.status === "pago"
-        ? ["Paga", "bg-muted text-foreground"]
-        : l.data_vencimento < hojeStr
-          ? ["Vencida", "bg-destructive/10 text-destructive"]
-          : ["A vencer", "border text-muted-foreground"];
-    return <span className={`rounded-sm px-2 py-0.5 text-xs font-medium ${cor}`}>{rotulo}</span>;
-  };
+  const badge = (l: Lancamento) =>
+    l.tipo === "despesa" ? <StatusTag status={l.status} vencimento={l.data_vencimento} hoje={hojeStr} /> : null;
 
   const valor = (l: Lancamento) => (
     <span className="font-semibold">
@@ -73,7 +67,7 @@ export function LancamentosView({
 
   const acoes = (l: Lancamento) => (
     <div className="flex gap-1">
-      {l.status === "pago" ? (
+      {l.tipo === "receita" ? null : l.status === "pago" ? (
         <Button variant="ghost" size="sm" disabled={pending} onClick={() => executar(() => pagarLancamento(l.id, null), "Pagamento desfeito", false)}>
           Desfazer
         </Button>
@@ -157,7 +151,7 @@ export function LancamentosView({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex flex-col text-xs text-muted-foreground">
                     <span>Vence {dataBR(l.data_vencimento)}</span>
-                    {l.data_pagamento && <span>Pago {dataBR(l.data_pagamento)}</span>}
+                    {l.tipo === "despesa" && l.data_pagamento && <span>Pago {dataBR(l.data_pagamento)}</span>}
                   </div>
                   {valor(l)}
                 </div>
@@ -183,9 +177,9 @@ export function LancamentosView({
                   <tr key={l.id}>
                     <td className="max-w-64 p-3">{detalhes(l)}</td>
                     <td className="p-3">{dataBR(l.data_vencimento)}</td>
-                    <td className="p-3">{l.data_pagamento ? dataBR(l.data_pagamento) : "—"}</td>
+                    <td className="p-3">{l.tipo === "despesa" && l.data_pagamento ? dataBR(l.data_pagamento) : "—"}</td>
                     <td className="p-3 text-right">{valor(l)}</td>
-                    <td className="p-3">{badge(l)}</td>
+                    <td className="p-3">{badge(l) ?? "—"}</td>
                     <td className="p-3">{acoes(l)}</td>
                   </tr>
                 ))}

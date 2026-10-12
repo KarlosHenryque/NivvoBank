@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { addMeses, dividirValor } from "@/lib/lancamentos";
+import { addMeses, calcularParcelas } from "@/lib/lancamentos";
 import { lancamentoEdicaoSchema, lancamentoSchema, pagamentoSchema } from "@/lib/validations/lancamento";
 
 type Resultado = { erro?: string };
@@ -50,7 +50,9 @@ export async function createLancamento(input: Record<string, unknown>): Promise<
   });
 
   const total = d.parcelado ? d.parcelas : d.repetir ? 13 : 1;
-  const valores = d.parcelado ? dividirValor(d.valor, total) : Array.from({ length: total }, () => d.valor);
+  const valores = d.parcelado
+    ? calcularParcelas(d.valor, total, d.modo_valor).valores
+    : Array.from({ length: total }, () => d.valor);
   const linhas = valores.map((v, i) => linha(i, v, total));
 
   const { error } = await supabase.rpc("criar_lancamentos", { p_linhas: linhas, p_agrupar: total > 1 });

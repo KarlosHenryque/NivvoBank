@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import Loading from "../loading";
 import { connection } from "next/server";
 import { Filtros } from "@/components/lancamentos/filtros";
 import { LancamentosView } from "@/components/lancamentos/lancamentos-view";
@@ -7,11 +9,19 @@ import { filtrosSchema } from "@/lib/validations/lancamento";
 
 export const metadata = { title: "Lançamentos | NivvoBank" };
 
-export default async function LancamentosPage({
-  searchParams,
-}: {
+type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+};
+
+export default function LancamentosPage({ searchParams }: Props) {
+  return (
+    <Suspense fallback={<Loading />}>
+      <Conteudo searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function Conteudo({ searchParams }: Props) {
   const f = filtrosSchema.parse(await searchParams);
   await connection();
   const mes = f.mes ?? mesAtual();
@@ -27,6 +37,7 @@ export default async function LancamentosPage({
     .order("data_vencimento")
     .order("id");
   if (f.tipo) query = query.eq("tipo", f.tipo);
+  if (f.status) query = query.eq("tipo", "despesa");
   if (f.status) query = query.eq("status", f.status);
   if (f.categoria) query = query.eq("categoria_id", f.categoria);
 

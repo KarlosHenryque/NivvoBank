@@ -1,5 +1,8 @@
+import { Suspense } from "react";
+import Loading from "./loading";
 import Link from "next/link";
 import { connection } from "next/server";
+import { StatusTag } from "@/components/lancamentos/status-tag";
 import { BarrasMeses, PizzaDespesas, type DespesaCategoria, type MesTotais } from "@/components/dashboard/graficos";
 import { createClient } from "@/lib/supabase/server";
 import { brl, dataBR, hojeBR, mesAtual, mesVizinho, nomeMes } from "@/lib/lancamentos";
@@ -20,11 +23,19 @@ type Pendente = { id: number; descricao: string; valor: number; data_vencimento:
 
 const navClass = "flex size-10 items-center justify-center rounded-lg text-xl hover:bg-muted";
 
-export default async function DashboardPage({
-  searchParams,
-}: {
+type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+};
+
+export default function DashboardPage({ searchParams }: Props) {
+  return (
+    <Suspense fallback={<Loading />}>
+      <Conteudo searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function Conteudo({ searchParams }: Props) {
   const { mes: mesParam } = filtrosSchema.pick({ mes: true }).parse(await searchParams);
   await connection();
   const mes = mesParam ?? mesAtual();
@@ -69,7 +80,10 @@ export default async function DashboardPage({
                 <p className="truncate font-medium">{c.descricao}</p>
                 <p className="text-xs text-muted-foreground">Vence {dataBR(c.data_vencimento)}</p>
               </div>
-              <span className="font-semibold">{brl(c.valor)}</span>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <span className="font-semibold">{brl(c.valor)}</span>
+                <StatusTag status="pendente" vencimento={c.data_vencimento} hoje={hoje} />
+              </div>
             </li>
           ))}
         </ul>

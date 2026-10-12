@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { InputMoeda } from "@/components/input-moeda";
 import { SubmitButton } from "@/components/submit-button";
-import { hojeBR, type Categoria, type Lancamento } from "@/lib/lancamentos";
+import { brl, calcularParcelas, hojeBR, type Categoria, type Lancamento, type ModoValor } from "@/lib/lancamentos";
 import { createLancamento, updateLancamento } from "@/app/(app)/lancamentos/actions";
 
 const campo =
@@ -65,6 +65,27 @@ function Segmentado<T extends string>({
   );
 }
 
+function ResumoParcelas({ valor, parcelas, modo }: { valor: number; parcelas: number; modo: ModoValor }) {
+  if (!Number.isInteger(parcelas) || parcelas < 2 || parcelas > 360 || valor <= 0) return null;
+  const r = calcularParcelas(valor, parcelas, modo);
+  const linhas = [
+    [modo === "total" ? "Valor informado (total)" : "Valor informado (parcela)", brl(valor)],
+    ["Parcelas", String(parcelas)],
+    ["Valor de cada parcela", r.ultima === r.parcela ? brl(r.parcela) : `${brl(r.parcela)} (última ${brl(r.ultima)})`],
+    ["Valor total da compra", brl(r.total)],
+  ];
+  return (
+    <dl aria-label="Resumo do parcelamento" className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1 rounded-lg bg-muted p-3 text-sm">
+      {linhas.map(([k, v]) => (
+        <div key={k} className="contents">
+          <dt className="text-muted-foreground">{k}</dt>
+          <dd className="text-right font-medium">{v}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 export function LancamentoForm({
   item,
   categorias,
@@ -78,6 +99,9 @@ export function LancamentoForm({
   const [recorrencia, setRecorrencia] = useState(item?.recorrencia ?? "variavel");
   const [parcelado, setParcelado] = useState(false);
   const [repetir, setRepetir] = useState(false);
+  const [valor, setValor] = useState(item?.valor ?? 0);
+  const [parcelas, setParcelas] = useState(2);
+  const [modoValor, setModoValor] = useState<ModoValor>("total");
   const [erro, setErro] = useState<string>();
 
   const mudarRecorrencia = (v: typeof recorrencia) => {
@@ -97,7 +121,7 @@ export function LancamentoForm({
     const dados = Object.fromEntries(formData);
     const r = item
       ? await updateLancamento(item.id, dados)
-      : await createLancamento({ ...dados, parcelado, repetir });
+      : await createLancamento({ ...dados, parcelado, repetir, modo_valor: modoValor });
     if (r.erro) setErro(r.erro);
     else {
       toast.success(item ? "Lançamento atualizado" : "Lançamento criado");
@@ -125,7 +149,7 @@ export function LancamentoForm({
       <div className="grid grid-cols-2 gap-3">
         <label className={rotulo}>
           Valor
-          <InputMoeda name="valor" defaultValue={item?.valor} className={campo} />
+          <InputMoeda name="valor" defaultValue={item?.valor} onValor={setValor} className={campo} />
         </label>
         <label className={rotulo}>
           Vencimento
@@ -181,19 +205,35 @@ export function LancamentoForm({
         <div className="flex flex-col">
           <LinhaSwitch rotulo="Parcelado?" checked={parcelado} onChange={mudarParcelado} />
           {parcelado && (
-            <label className={rotulo}>
-              Número de parcelas
-              <input
-                name="parcelas"
-                type="number"
-                inputMode="numeric"
-                min={2}
-                max={360}
-                defaultValue={2}
-                required
-                className={`${campo} ${semSpinner}`}
-              />
-            </label>
+            <div className="flex flex-col gap-4 pb-2">
+              <label className={rotulo}>
+                Número de parcelas
+                <input
+                  name="parcelas"
+                  type="number"
+                  inputMode="numeric"
+                  min={2}
+                  max={360}
+                  value={parcelas}
+                  onChange={(e) => setParcelas(Number(e.target.value))}
+                  required
+                  className={`${campo} ${semSpinner}`}
+                />
+              </label>
+              <div className={rotulo}>
+                O valor informado é
+                <Segmentado
+                  name="modo_valor"
+                  valor={modoValor}
+                  onChange={setModoValor}
+                  opcoes={[
+                    { valor: "total", label: "Valor total" },
+                    { valor: "parcela", label: "Valor da parcela" },
+                  ]}
+                />
+              </div>
+              <ResumoParcelas valor={valor} parcelas={parcelas} modo={modoValor} />
+            </div>
           )}
           {recorrencia === "fixa" && (
             <LinhaSwitch rotulo="Repetir pelos próximos 12 meses" checked={repetir} onChange={mudarRepetir} />

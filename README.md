@@ -1,19 +1,17 @@
 # NivvoBank
 
-Controle financeiro pessoal. Next.js (App Router) + Tailwind + Supabase (Auth, Postgres, RLS).
+Controle financeiro pessoal, simples e responsivo (celular e desktop). Registre receitas e despesas, acompanhe o que está a pagar e veja para onde o dinheiro está indo.
 
-## Rodar
+## Funcionalidades
 
-```bash
-cp .env.local.example .env.local   # preencha URL e chave anon do Supabase
-npm install
-npm run dev
-```
+- **Dashboard mensal:** receitas, despesas, saldo do mês, saldo atual e total a pagar, com gráficos por categoria e comparativo dos últimos 6 meses.
+- **Lançamentos:** cadastro, edição e exclusão de receitas e despesas, com filtros por mês, tipo, status e categoria.
+- **Status de pagamento:** despesas aparecem como **Paga** (verde) ou **A pagar / Vencida** (vermelho).
+- **Parcelamento:** informe o valor total ou o valor da parcela, com resumo automático e ajuste de centavos na última parcela.
+- **Recorrência:** lançamentos fixos podem ser repetidos pelos próximos 12 meses.
+- **Categorias coloridas:** categorias padrão (incluindo Cartão e Veículo) e personalizadas, com cor própria.
+- **Tema claro e escuro**, instalável como PWA.
 
-## Banco
+## Tecnologias
 
-Migrations em `supabase/migrations` (aplicar na ordem `001` → `003`).
-
-## Design
-
-Tokens e regras em `docs/DESIGN.md`, aplicados em `src/app/globals.css`.
+Next.js (App Router, TypeScript), Tailwind, shadcn/ui, Supabase (Auth, Postgres, RLS), zod, Recharts e Playwright.

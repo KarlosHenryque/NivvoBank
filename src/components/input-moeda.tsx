@@ -9,11 +9,13 @@ export function InputMoeda({
   name,
   defaultValue = 0,
   permitirNegativo,
+  onValor,
   className,
 }: {
   name: string;
   defaultValue?: number;
   permitirNegativo?: boolean;
+  onValor?: (valor: number) => void;
   className?: string;
 }) {
   const [centavos, setCentavos] = useState(Math.round(defaultValue * 100));
@@ -28,7 +30,9 @@ export function InputMoeda({
         onChange={(e) => {
           const v = e.target.value;
           const n = Number(v.replace(/\D/g, "") || 0);
-          setCentavos(permitirNegativo && v.includes("-") ? -n : n);
+          const c = permitirNegativo && v.includes("-") ? -n : n;
+          setCentavos(c);
+          onValor?.(c / 100);
         }}
         className={className}
       />

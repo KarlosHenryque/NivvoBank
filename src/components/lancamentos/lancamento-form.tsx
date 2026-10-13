@@ -104,6 +104,8 @@ export function LancamentoForm({
   const [modoValor, setModoValor] = useState<ModoValor>("total");
   const [erro, setErro] = useState<string>();
 
+  const despesa = tipo === "despesa";
+
   const mudarRecorrencia = (v: typeof recorrencia) => {
     setRecorrencia(v);
     if (v !== "fixa") setRepetir(false);
@@ -121,7 +123,12 @@ export function LancamentoForm({
     const dados = Object.fromEntries(formData);
     const r = item
       ? await updateLancamento(item.id, dados)
-      : await createLancamento({ ...dados, parcelado, repetir, modo_valor: modoValor });
+      : await createLancamento({
+          ...dados,
+          parcelado: despesa && parcelado,
+          repetir: despesa && repetir,
+          modo_valor: modoValor,
+        });
     if (r.erro) setErro(r.erro);
     else {
       toast.success(item ? "Lançamento atualizado" : "Lançamento criado");
@@ -146,19 +153,19 @@ export function LancamentoForm({
         <input name="descricao" required maxLength={120} defaultValue={item?.descricao} className={campo} />
       </label>
 
-      <div className="grid grid-cols-2 gap-3">
-        <label className={rotulo}>
+      <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
+        <label className={`${rotulo} min-w-0`}>
           Valor
           <InputMoeda name="valor" defaultValue={item?.valor} onValor={setValor} className={campo} />
         </label>
-        <label className={rotulo}>
+        <label className={`${rotulo} min-w-0`}>
           Vencimento
           <input
             name="data_vencimento"
             type="date"
             required
             defaultValue={item?.data_vencimento ?? hojeBR()}
-            className={campo}
+            className={`${campo} min-w-0 appearance-none`}
           />
         </label>
       </div>
@@ -201,7 +208,7 @@ export function LancamentoForm({
         />
       </label>
 
-      {!item && (
+      {!item && despesa && (
         <div className="flex flex-col">
           <LinhaSwitch rotulo="Parcelado?" checked={parcelado} onChange={mudarParcelado} />
           {parcelado && (

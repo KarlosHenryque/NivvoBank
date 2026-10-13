@@ -201,7 +201,7 @@ export function LancamentosView({
           <p className="text-sm text-muted-foreground">{item?.descricao}</p>
           <label className="flex flex-col gap-1.5 text-sm font-medium">
             Data do pagamento
-            <input name="data" type="date" required defaultValue={hojeBR()} className={campo} />
+            <input name="data" type="date" required defaultValue={hojeBR()} className={`${campo} min-w-0 appearance-none`} />
           </label>
           {erro && <p role="alert" className="text-sm text-destructive">{erro}</p>}
           <div className="flex justify-end gap-2">

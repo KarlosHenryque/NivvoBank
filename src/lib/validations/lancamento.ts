@@ -52,7 +52,7 @@ export const filtrosSchema = z.object({
     .regex(/^\d{4}-(0[1-9]|1[0-2])$/)
     .optional()
     .catch(undefined),
-  tipo: z.enum(["receita", "despesa"]).optional().catch(undefined),
+  tipo: z.enum(["receita", "despesa", "todos"]).optional().catch(undefined),
   status: z.enum(["pendente", "pago"]).optional().catch(undefined),
   categoria: idFiltro,
 });

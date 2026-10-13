@@ -28,19 +28,20 @@ export function Filtros({
     router.replace(`/lancamentos?${p}`);
   }
 
-  const tipo = params.get("tipo") ?? "";
+  const tipo = params.get("tipo") ?? "despesa";
   const select = (
     chave: string,
     rotulo: string,
     opcoes: { valor: string | number; label: string }[],
+    padrao?: string,
   ) => (
     <select
       aria-label={rotulo}
-      value={params.get(chave) ?? ""}
+      value={params.get(chave) ?? padrao ?? ""}
       onChange={(e) => ir(chave, e.target.value)}
       className={campo}
     >
-      <option value="">{rotulo}</option>
+      {!padrao && <option value="">{rotulo}</option>}
       {opcoes.map((o) => (
         <option key={o.valor} value={o.valor}>
           {o.label}
@@ -62,10 +63,16 @@ export function Filtros({
       </div>
 
       <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
-        {select("tipo", "Todos os tipos", [
-          { valor: "receita", label: "Receitas" },
-          { valor: "despesa", label: "Despesas" },
-        ])}
+        {select(
+          "tipo",
+          "Tipo",
+          [
+            { valor: "todos", label: "Todos os tipos" },
+            { valor: "receita", label: "Receitas" },
+            { valor: "despesa", label: "Despesas" },
+          ],
+          "despesa",
+        )}
         {select("status", "Todos os status", [
           { valor: "pendente", label: "Pendentes" },
           { valor: "pago", label: "Pagos" },
@@ -73,7 +80,7 @@ export function Filtros({
         {select(
           "categoria",
           "Todas as categorias",
-          categorias.filter((c) => !tipo || c.tipo === tipo).map((c) => ({ valor: c.id, label: c.nome })),
+          categorias.filter((c) => tipo === "todos" || c.tipo === tipo).map((c) => ({ valor: c.id, label: c.nome })),
         )}
       </div>
     </div>

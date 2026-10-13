@@ -36,7 +36,8 @@ async function Conteudo({ searchParams }: Props) {
     .lt("data_vencimento", addMeses(`${mes}-01`, 1))
     .order("data_vencimento")
     .order("id");
-  if (f.tipo) query = query.eq("tipo", f.tipo);
+  const tipo = f.tipo ?? "despesa";
+  if (tipo !== "todos") query = query.eq("tipo", tipo);
   if (f.status) query = query.eq("tipo", "despesa");
   if (f.status) query = query.eq("status", f.status);
   if (f.categoria) query = query.eq("categoria_id", f.categoria);

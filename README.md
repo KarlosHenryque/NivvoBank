@@ -4,7 +4,7 @@ Controle financeiro pessoal, simples e responsivo (celular e desktop). Registre 
 
 ## Funcionalidades
 
-- **Dashboard mensal:** receitas, despesas, saldo do mês, saldo atual e total a pagar, com gráficos por categoria e comparativo dos últimos 6 meses.
+- **Dashboard mensal:** receitas, despesas, saldo do mês e total a pagar, com gráficos por categoria e comparativo dos últimos 6 meses.
 - **Lançamentos:** cadastro, edição e exclusão de receitas e despesas, com filtros por mês, tipo, status e categoria.
 - **Status de pagamento:** despesas aparecem como **Paga** (verde) ou **A pagar / Vencida** (vermelho).
 - **Parcelamento:** informe o valor total ou o valor da parcela, com resumo automático e ajuste de centavos na última parcela.

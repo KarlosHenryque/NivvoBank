@@ -19,7 +19,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
-  --font-heading: var(--font-inter);
+  --font-heading: var(--font-display);
+  --color-positivo: var(--positivo);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -41,8 +42,8 @@
   --radius-md: 12px;
   --radius-lg: 12px;
   --radius-xl: 12px;
-  --radius-2xl: 12px;
-  --radius-3xl: 12px;
+  --radius-2xl: 20px;
+  --radius-3xl: 28px;
   --radius-4xl: 12px;
 }
 
@@ -77,6 +78,7 @@
   --input: var(--mist);
   --ring: var(--steel);
   --radius: 12px;
+  --positivo: #15803d;
 }
 
 .dark {
@@ -98,6 +100,7 @@
   --border: rgb(255 255 255 / 14%);
   --input: rgb(255 255 255 / 18%);
   --ring: var(--steel);
+  --positivo: #4ade80;
 }
 
 @layer base {
@@ -112,7 +115,91 @@
   html {
     @apply font-sans;
   }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
   input::placeholder {
     color: var(--steel);
+  }
+}
+
+select {
+  appearance: none;
+  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+}
+
+.sem-scroll {
+  scrollbar-width: none;
+}
+.sem-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes preencher {
+  from {
+    transform: scaleX(0);
+  }
+}
+.preencher {
+  transform-origin: left;
+  animation: preencher 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+dialog[open] {
+  animation: pop-in 160ms ease-out;
+}
+dialog[open]::backdrop {
+  animation: fade-in 200ms ease-out;
+}
+@media (max-width: 767px) {
+  dialog[open] {
+    animation: sheet-up 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+.shimmer {
+  background-image: linear-gradient(90deg, transparent 30%, rgb(128 128 128 / 0.14) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

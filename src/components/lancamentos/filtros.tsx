@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { mesVizinho, nomeMes, type Categoria } from "@/lib/lancamentos";
 
@@ -51,31 +52,31 @@ export function Filtros({
   );
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between rounded-xl border bg-card p-1">
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+      <div className="flex items-center justify-between rounded-xl border bg-card p-1 lg:w-72 lg:shrink-0">
         <Button variant="ghost" size="icon-lg" aria-label="Mês anterior" onClick={() => ir("mes", mesVizinho(mes, -1))}>
-          ‹
+          <ChevronLeft className="size-5" />
         </Button>
         <span className="font-medium first-letter:uppercase">{nomeMes(mes)}</span>
         <Button variant="ghost" size="icon-lg" aria-label="Próximo mês" onClick={() => ir("mes", mesVizinho(mes, 1))}>
-          ›
+          <ChevronRight className="size-5" />
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2 max-sm:[&>*:last-child]:col-span-2 sm:grid-cols-3 lg:flex-1">
         {select(
           "tipo",
           "Tipo",
           [
             { valor: "todos", label: "Todos os tipos" },
-            { valor: "receita", label: "Receitas" },
             { valor: "despesa", label: "Despesas" },
+            { valor: "receita", label: "Receitas" },
           ],
           "despesa",
         )}
         {select("status", "Todos os status", [
-          { valor: "pendente", label: "Pendentes" },
           { valor: "pago", label: "Pagos" },
+          { valor: "pendente", label: "Pendentes" },
         ])}
         {select(
           "categoria",

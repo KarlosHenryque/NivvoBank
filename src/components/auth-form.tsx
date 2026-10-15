@@ -71,7 +71,35 @@ export function AuthForm({
   const { valida, nivel } = avaliarSenha(senha);
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-muted p-4">
+    <main className="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
+      <aside className="relative hidden flex-col justify-between overflow-hidden bg-abyss p-12 text-white lg:flex">
+        <span className="font-heading flex items-center gap-3 text-xl font-semibold">
+          <Logo size={36} />
+          NivvoBank
+        </span>
+        <div className="flex max-w-md flex-col gap-8">
+          <p className="font-heading text-5xl leading-[1.05] font-semibold tracking-tight">
+            Saiba para onde vai cada real do mês.
+          </p>
+          <div aria-hidden className="flex h-4 w-full gap-0.5 overflow-hidden rounded-full bg-white/10">
+            {[
+              ["#ff5900", 34],
+              ["#3b82f6", 22],
+              ["#a855f7", 14],
+              ["#eab308", 9],
+            ].map(([cor, w], i) => (
+              <span
+                key={cor}
+                className="preencher h-full"
+                style={{ width: `${w}%`, background: String(cor), animationDelay: `${300 + i * 90}ms` }}
+              />
+            ))}
+          </div>
+          <p className="text-white/65">Lançamentos, parcelas e vencimentos em um só lugar.</p>
+        </div>
+        <span />
+      </aside>
+      <div className="flex items-center justify-center p-4 sm:p-8">
       <form
         action={action}
         onSubmit={(e) => {
@@ -80,9 +108,9 @@ export function AuthForm({
             setSenhaInvalida(true);
           }
         }}
-        className="flex w-full max-w-sm flex-col gap-4 rounded-xl border bg-card p-6 sm:p-8"
+        className="flex w-full max-w-sm flex-col gap-4"
       >
-        <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
+        <h1 className="flex items-center gap-3 text-3xl font-semibold tracking-tight">
           <Logo size={40} />
           NivvoBank
         </h1>
@@ -157,6 +185,7 @@ export function AuthForm({
           )}
         </p>
       </form>
+      </div>
     </main>
   );
 }

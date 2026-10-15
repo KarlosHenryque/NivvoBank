@@ -11,14 +11,22 @@ async function EmailUsuario() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  return <span className="truncate px-1 text-xs text-muted-foreground">{user?.email}</span>;
+  const email = user?.email ?? "";
+  return (
+    <span className="flex items-center gap-2 px-1">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold uppercase">
+        {email[0]}
+      </span>
+      <span className="truncate text-xs text-muted-foreground">{email}</span>
+    </span>
+  );
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh md:pl-60">
       <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col gap-6 border-r bg-card p-4 md:flex">
-        <span className="flex items-center gap-2 px-3 text-xl font-semibold">
+        <span className="font-heading flex items-center gap-2.5 px-3 text-xl font-semibold tracking-tight">
           <Logo size={32} />
           NivvoBank
         </span>
@@ -36,8 +44,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/95 px-4 py-3 backdrop-blur md:hidden">
-        <span className="flex items-center gap-2 text-lg font-semibold">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/85 px-4 py-2.5 backdrop-blur-md md:hidden">
+        <span className="font-heading flex items-center gap-2 text-lg font-semibold tracking-tight">
           <Logo size={28} />
           NivvoBank
         </span>
@@ -47,9 +55,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-[1200px] p-4 pb-24 sm:p-8 md:pb-8">{children}</main>
+      <main className="mx-auto w-full max-w-[1200px] p-4 pb-28 sm:p-8 md:pb-10">{children}</main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-10 flex border-t bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-10 flex border-t bg-card/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden">
         <NavLinks variant="bottom" />
       </nav>
     </div>

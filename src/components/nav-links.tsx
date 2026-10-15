@@ -24,17 +24,25 @@ export function NavLinks({ variant }: { variant: "sidebar" | "bottom" }) {
             href={href}
             aria-current={ativo ? "page" : undefined}
             className={cn(
-              "transition-colors",
+              "group relative transition-colors",
               variant === "sidebar"
-                ? "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium"
-                : "flex flex-1 flex-col items-center gap-1 py-2 text-xs font-medium",
-              ativo
-                ? "bg-muted text-foreground"
-                : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-              variant === "bottom" && ativo && "bg-transparent",
+                ? "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium"
+                : "flex flex-1 flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium",
+              ativo ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+              variant === "sidebar" && (ativo ? "bg-muted" : "hover:bg-muted/60"),
             )}
           >
-            <Icon className="size-5 text-foreground" />
+            {variant === "sidebar" && ativo && (
+              <span className="absolute inset-y-2 left-0 w-1 rounded-full bg-primary" />
+            )}
+            <span
+              className={cn(
+                variant === "bottom" && "flex h-7 w-14 items-center justify-center rounded-full transition-colors",
+                variant === "bottom" && ativo && "bg-primary/15",
+              )}
+            >
+              <Icon className={cn("size-5 transition-colors", ativo && "text-primary")} />
+            </span>
             {label}
           </Link>
         );

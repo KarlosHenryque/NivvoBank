@@ -2,7 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { Check, Pencil, Trash2, Undo2, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ValorOculto } from "@/components/dashboard/valor-oculto";
 import { EstadoVazio } from "@/components/estado-vazio";
 import { Modal } from "@/components/modal";
 import { LancamentoForm } from "./lancamento-form";
@@ -10,17 +12,47 @@ import { StatusTag } from "./status-tag";
 import { brl, dataBR, hojeBR, type Categoria, type Lancamento } from "@/lib/lancamentos";
 import { excluirLancamento, pagarLancamento } from "@/app/(app)/lancamentos/actions";
 
-type Modo = { tipo: "form" | "pagar" | "excluir"; item: Lancamento | null } | null;
+type Modo = { tipo: "form" | "pagar" | "excluir" | "parcelas"; item: Lancamento | null } | null;
 
 const campo =
   "h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
 
+function IconBtn({ icone: Icone, rotulo, onClick, disabled, destrutivo }: { icone: LucideIcon; rotulo: string; onClick: () => void; disabled?: boolean; destrutivo?: boolean }) {
+  return (
+    <span className="group relative inline-flex">
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label={rotulo}
+        disabled={disabled}
+        className={destrutivo ? "text-destructive hover:text-destructive" : undefined}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+      >
+        <Icone className="size-4" />
+      </Button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute -top-8 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-2 py-1 text-xs text-background opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+      >
+        {rotulo}
+      </span>
+    </span>
+  );
+}
+
 export function LancamentosView({
   lancamentos,
+  parcelas,
   categorias,
   filtros,
+  totais: resumo,
 }: {
+  totais: { receitas: number; despesas: number };
   lancamentos: Lancamento[];
+  parcelas: Lancamento[];
   categorias: Categoria[];
   filtros: React.ReactNode;
 }) {
@@ -51,8 +83,7 @@ export function LancamentosView({
   const parcelada = !!item && !!item.grupo_parcelas && item.total_parcelas > 1;
 
   const hojeStr = hojeBR();
-  const receitas = lancamentos.filter((l) => l.tipo === "receita").reduce((s, l) => s + l.valor, 0);
-  const despesas = lancamentos.filter((l) => l.tipo === "despesa").reduce((s, l) => s + l.valor, 0);
+  const { receitas, despesas } = resumo;
   const saldo = receitas - despesas;
 
   const badge = (l: Lancamento) =>
@@ -66,24 +97,21 @@ export function LancamentosView({
   );
 
   const acoes = (l: Lancamento) => (
-    <div className="flex gap-1">
+    <div className="flex items-center justify-center gap-1">
       {l.tipo === "receita" ? null : l.status === "pago" ? (
-        <Button variant="ghost" size="sm" disabled={pending} onClick={() => executar(() => pagarLancamento(l.id, null), "Pagamento desfeito", false)}>
-          Desfazer
-        </Button>
+        <IconBtn icone={Undo2} rotulo="Desfazer" disabled={pending} onClick={() => executar(() => pagarLancamento(l.id, null), "Pagamento desfeito", false)} />
       ) : (
-        <Button variant="ghost" size="sm" onClick={() => setModo({ tipo: "pagar", item: l })}>
-          Pagar
-        </Button>
+        <IconBtn icone={Check} rotulo="Pagar" onClick={() => setModo({ tipo: "pagar", item: l })} />
       )}
-      <Button variant="ghost" size="sm" onClick={() => setModo({ tipo: "form", item: l })}>
-        Editar
-      </Button>
-      <Button variant="ghost" size="sm" onClick={() => setModo({ tipo: "excluir", item: l })}>
-        Excluir
-      </Button>
+      <IconBtn icone={Pencil} rotulo="Editar" onClick={() => setModo({ tipo: "form", item: l })} />
+      <IconBtn icone={Trash2} rotulo="Lixeira" destrutivo onClick={() => setModo({ tipo: "excluir", item: l })} />
     </div>
   );
+
+  const ehParcelado = (l: Lancamento) => !!l.grupo_parcelas && l.total_parcelas > 1;
+  const abrirParcelas = (l: Lancamento) => ehParcelado(l) && setModo({ tipo: "parcelas", item: l });
+  const clicavel = (l: Lancamento) => (ehParcelado(l) ? "cursor-pointer hover:bg-muted/50" : "");
+  const listaParcelas = item?.grupo_parcelas ? parcelas.filter((p) => p.grupo_parcelas === item.grupo_parcelas) : [];
 
   const detalhes = (l: Lancamento) => {
     const c = cat(l.categoria_id);
@@ -127,12 +155,16 @@ export function LancamentosView({
       {filtros}
 
       <div className="grid grid-cols-3 gap-2">
-        {totais.map((t) => (
-          <div key={t.rotulo} className="rounded-xl border bg-card p-4 sm:p-6">
-            <p className="text-xs text-muted-foreground">{t.rotulo}</p>
-            <p className="text-sm font-semibold sm:text-xl">{brl(t.v)}</p>
-          </div>
-        ))}
+        {totais.map((t) =>
+          t.rotulo === "Receitas" ? (
+            <ValorOculto key={t.rotulo} rotulo={t.rotulo} valor={brl(t.v)} valorClassName="text-sm sm:text-xl" />
+          ) : (
+            <div key={t.rotulo} className="rounded-xl border bg-card p-4 sm:p-6">
+              <p className="text-xs text-muted-foreground">{t.rotulo}</p>
+              <p className="text-sm font-semibold sm:text-xl">{brl(t.v)}</p>
+            </div>
+          ),
+        )}
       </div>
 
       {lancamentos.length === 0 ? (
@@ -143,7 +175,7 @@ export function LancamentosView({
         <>
           <ul className="flex flex-col gap-2 md:hidden">
             {lancamentos.map((l) => (
-              <li key={l.id} className="flex flex-col gap-3 rounded-xl border bg-card p-4">
+              <li key={l.id} onClick={() => abrirParcelas(l)} className={`flex flex-col gap-3 rounded-xl border bg-card p-4 ${clicavel(l)}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">{detalhes(l)}</div>
                   {badge(l)}
@@ -161,25 +193,25 @@ export function LancamentosView({
           </ul>
 
           <div className="hidden overflow-x-auto rounded-xl border bg-card md:block">
-            <table className="w-full text-sm">
-              <thead className="border-b text-left text-xs text-muted-foreground">
+            <table className="w-full text-center text-sm">
+              <thead className="border-b text-center text-xs text-muted-foreground">
                 <tr>
                   <th className="p-3 font-medium">Descrição</th>
                   <th className="p-3 font-medium">Vencimento</th>
                   <th className="p-3 font-medium">Pagamento</th>
-                  <th className="p-3 text-right font-medium">Valor</th>
+                  <th className="p-3 font-medium">Valor</th>
                   <th className="p-3 font-medium">Status</th>
                   <th className="p-3" />
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {lancamentos.map((l) => (
-                  <tr key={l.id}>
-                    <td className="max-w-64 p-3">{detalhes(l)}</td>
+                  <tr key={l.id} onClick={() => abrirParcelas(l)} className={clicavel(l)}>
+                    <td className="max-w-64 p-3 [&_p]:justify-center">{detalhes(l)}</td>
                     <td className="p-3">{dataBR(l.data_vencimento)}</td>
                     <td className="p-3">{l.tipo === "despesa" && l.data_pagamento ? dataBR(l.data_pagamento) : "—"}</td>
-                    <td className="p-3 text-right">{valor(l)}</td>
-                    <td className="p-3">{badge(l) ?? "—"}</td>
+                    <td className="p-3">{valor(l)}</td>
+                    <td className="p-3"><div className="flex justify-center">{badge(l) ?? "—"}</div></td>
                     <td className="p-3">{acoes(l)}</td>
                   </tr>
                 ))}
@@ -191,6 +223,25 @@ export function LancamentosView({
 
       <Modal aberto={modo?.tipo === "form"} onFechar={fechar} titulo={item ? "Editar lançamento" : "Novo lançamento"}>
         <LancamentoForm item={item} categorias={categorias} onFechar={fechar} />
+      </Modal>
+
+      <Modal aberto={modo?.tipo === "parcelas"} onFechar={fechar} titulo={`Parcelas — ${item?.descricao ?? ""}`}>
+        <ul className="sem-scroll flex max-h-[60dvh] flex-col gap-2 overflow-y-auto">
+          {listaParcelas.map((p) => (
+            <li key={p.id} className={`flex items-center justify-between gap-3 rounded-lg border p-3 text-sm ${p.id === item?.id ? "border-ring" : ""}`}>
+              <div className="flex flex-col">
+                <span className="font-medium">
+                  {p.parcela_atual}/{p.total_parcelas}
+                </span>
+                <span className="text-xs text-muted-foreground">Vence {dataBR(p.data_vencimento)}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                {valor(p)}
+                {badge(p)}
+              </div>
+            </li>
+          ))}
+        </ul>
       </Modal>
 
       <Modal aberto={modo?.tipo === "pagar"} onFechar={fechar} titulo="Marcar como pago">

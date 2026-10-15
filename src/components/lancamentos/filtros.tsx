@@ -68,14 +68,14 @@ export function Filtros({
           "Tipo",
           [
             { valor: "todos", label: "Todos os tipos" },
-            { valor: "receita", label: "Receitas" },
             { valor: "despesa", label: "Despesas" },
+            { valor: "receita", label: "Receitas" },
           ],
           "despesa",
         )}
         {select("status", "Todos os status", [
-          { valor: "pendente", label: "Pendentes" },
           { valor: "pago", label: "Pagos" },
+          { valor: "pendente", label: "Pendentes" },
         ])}
         {select(
           "categoria",

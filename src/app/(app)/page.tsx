@@ -4,6 +4,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { StatusTag } from "@/components/lancamentos/status-tag";
 import { BarrasMeses, PizzaDespesas, type DespesaCategoria, type MesTotais } from "@/components/dashboard/graficos";
+import { ValorOculto } from "@/components/dashboard/valor-oculto";
 import { createClient } from "@/lib/supabase/server";
 import { brl, dataBR, hojeBR, mesAtual, mesVizinho, nomeMes } from "@/lib/lancamentos";
 import { filtrosSchema } from "@/lib/validations/lancamento";
@@ -53,7 +54,7 @@ async function Conteudo({ searchParams }: Props) {
 
   const [resumo, aVencer, vencidas] = await Promise.all([
     supabase.rpc("resumo_dashboard", { p_mes: `${mes}-01` }),
-    pendentes().gte("data_vencimento", hoje),
+    pendentes().gte("data_vencimento", hoje).lt("data_vencimento", `${mesVizinho(hoje.slice(0, 7), 2)}-01`),
     pendentes().lt("data_vencimento", hoje),
   ]);
 
@@ -65,7 +66,6 @@ async function Conteudo({ searchParams }: Props) {
     { rotulo: "Receitas", v: r.receitas },
     { rotulo: "Despesas", v: r.despesas },
     { rotulo: "Saldo do mês", v: saldoMes },
-    { rotulo: "Saldo atual", v: r.saldo_atual },
     { rotulo: "Total a pagar", v: r.a_pagar },
   ];
 
@@ -110,13 +110,17 @@ async function Conteudo({ searchParams }: Props) {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-        {cards.map((c) => (
-          <div key={c.rotulo} className="rounded-xl border bg-card p-4 last:col-span-2 sm:p-6 lg:last:col-span-1">
-            <p className="text-xs text-muted-foreground">{c.rotulo}</p>
-            <p className="text-lg font-semibold">{brl(c.v)}</p>
-          </div>
-        ))}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {cards.map((c) =>
+          c.rotulo === "Receitas" || c.rotulo === "Saldo do mês" ? (
+            <ValorOculto key={c.rotulo} rotulo={c.rotulo} valor={brl(c.v)} valorClassName="text-lg" />
+          ) : (
+            <div key={c.rotulo} className="rounded-xl border bg-card p-4 sm:p-6">
+              <p className="text-xs text-muted-foreground">{c.rotulo}</p>
+              <p className="text-lg font-semibold">{brl(c.v)}</p>
+            </div>
+          ),
+        )}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">

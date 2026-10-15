@@ -16,7 +16,7 @@ test("navega entre as páginas pelo menu", async ({ page }) => {
 
 test("dashboard mostra cards, gráficos e listas", async ({ page }) => {
   await page.goto("/");
-  for (const r of ["Receitas", "Despesas", "Saldo do mês", "Saldo atual", "Total a pagar"]) {
+  for (const r of ["Receitas", "Despesas", "Saldo do mês", "Total a pagar"]) {
     await expect(page.locator("p", { hasText: new RegExp(`^${r}$`) })).toBeVisible();
   }
   await expect(page.getByRole("heading", { name: "Despesas por categoria" })).toBeVisible();

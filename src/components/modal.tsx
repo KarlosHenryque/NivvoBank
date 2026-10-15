@@ -26,7 +26,8 @@ export function Modal({
     <dialog
       ref={ref}
       onClose={onFechar}
-      className="m-auto overflow-y-auto bg-background p-0 text-foreground backdrop:bg-black/50 max-md:m-0 max-md:h-dvh max-md:max-h-none max-md:w-full max-md:max-w-none md:w-full md:max-w-lg md:rounded-xl md:border md:shadow-lg"
+      onClick={(e) => e.target === e.currentTarget && onFechar()}
+      className="sem-scroll m-auto overflow-y-auto bg-background p-0 text-foreground backdrop:bg-black/50 max-md:m-0 max-md:h-dvh max-md:max-h-none max-md:w-full max-md:max-w-none md:w-full md:max-w-lg md:rounded-xl md:border md:shadow-lg"
     >
       {aberto && (
         <div className="flex flex-col gap-4 p-4 sm:p-6">

@@ -63,8 +63,8 @@ export function BarrasMeses({ dados }: { dados: MesTotais[] }) {
           <YAxis width={56} tick={{ fill: "currentColor" }} tickFormatter={compacto} />
           <Tooltip formatter={fmt} {...tooltipStyle} />
           <Legend />
-          <Bar dataKey="receitas" name="Receitas" fill="var(--foreground)" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="despesas" name="Despesas" fill="var(--steel)" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="receitas" name="Receitas" fill="var(--green)" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="despesas" name="Despesas" fill="var(--destructive)" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

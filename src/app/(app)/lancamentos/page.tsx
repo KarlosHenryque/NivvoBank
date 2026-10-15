@@ -42,17 +42,34 @@ async function Conteudo({ searchParams }: Props) {
   if (f.status) query = query.eq("status", f.status);
   if (f.categoria) query = query.eq("categoria_id", f.categoria);
 
-  const [lancamentos, categorias] = await Promise.all([
+  const [lancamentos, categorias, resumo] = await Promise.all([
     query,
     supabase.from("categorias").select("id, nome, tipo, cor").order("nome"),
+    supabase.rpc("resumo_dashboard", { p_mes: `${mes}-01` }),
   ]);
 
   const lista = (lancamentos.data ?? []) as Lancamento[];
   const cats = (categorias.data ?? []) as Categoria[];
 
+  const grupos = [...new Set(lista.filter((l) => l.grupo_parcelas && l.total_parcelas > 1).map((l) => l.grupo_parcelas!))];
+  const parcelas = grupos.length
+    ? (
+        await supabase
+          .from("lancamentos")
+          .select("id, tipo, descricao, valor, data_vencimento, data_pagamento, status, recorrencia, parcela_atual, total_parcelas, grupo_parcelas, categoria_id, observacao")
+          .in("grupo_parcelas", grupos)
+          .order("parcela_atual")
+      ).data ?? []
+    : [];
+
+  const r = resumo.error ? null : (resumo.data as { receitas: number; despesas: number } | null);
+  const totais = { receitas: r?.receitas ?? 0, despesas: r?.despesas ?? 0 };
+
   return (
     <LancamentosView
+      totais={totais}
       lancamentos={lista}
+      parcelas={parcelas as Lancamento[]}
       categorias={cats}
       filtros={<Filtros mes={mes} categorias={cats} />}
     />

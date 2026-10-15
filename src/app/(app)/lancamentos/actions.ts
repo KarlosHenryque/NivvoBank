@@ -72,6 +72,14 @@ export async function updateLancamento(id: number, input: Record<string, unknown
   if (!user) return { erro: "Sessão expirada" };
   if (!(await categoriaValida(supabase, d.categoria_id, d.tipo))) return { erro: "Categoria inválida" };
 
+  const { data: atual } = await supabase
+    .from("lancamentos")
+    .select("grupo_parcelas, parcela_atual, data_vencimento")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .single();
+  if (!atual) return FALHA;
+
   const { data, error } = await supabase
     .from("lancamentos")
     .update({ ...d, data_competencia: d.data_vencimento })
@@ -79,6 +87,28 @@ export async function updateLancamento(id: number, input: Record<string, unknown
     .eq("user_id", user.id)
     .select("id");
   if (error || !data?.length) return FALHA;
+
+  if (atual.grupo_parcelas) {
+    const { data_vencimento, ...comuns } = d;
+    const { data: outras, error: erroGrupo } = await supabase
+      .from("lancamentos")
+      .update(comuns)
+      .eq("grupo_parcelas", atual.grupo_parcelas)
+      .eq("user_id", user.id)
+      .neq("id", id)
+      .select("id, parcela_atual");
+    if (erroGrupo) return FALHA;
+
+    if (data_vencimento !== atual.data_vencimento) {
+      const resultados = await Promise.all(
+        (outras ?? []).map((o) => {
+          const venc = addMeses(data_vencimento, o.parcela_atual - atual.parcela_atual);
+          return supabase.from("lancamentos").update({ data_vencimento: venc, data_competencia: venc }).eq("id", o.id).eq("user_id", user.id);
+        }),
+      );
+      if (resultados.some((r) => r.error)) return FALHA;
+    }
+  }
 
   atualizar();
   return {};

@@ -15,10 +15,10 @@ export function ValorOculto({ rotulo, valor, className, valorClassName }: Props)
       type="button"
       onClick={() => setVisivel((v) => !v)}
       aria-label={visivel ? `Ocultar ${rotulo}` : `Mostrar ${rotulo}`}
-      className={cn("rounded-xl border bg-card p-4 text-left sm:p-6", className)}
+      className={cn("rounded-xl border bg-card p-4 text-left transition-colors hover:bg-muted/50 sm:p-5", className)}
     >
       <p className="text-xs text-muted-foreground">{rotulo}</p>
-      <span className={cn("flex items-center gap-1.5 font-semibold", valorClassName)}>
+      <span className={cn("num flex items-center gap-1.5 font-semibold", valorClassName)}>
         {visivel ? valor : "R$ •••••"}
         <Icone className="size-4 shrink-0 text-muted-foreground" />
       </span>

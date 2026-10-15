@@ -6,6 +6,9 @@ const estilos = {
 export function StatusTag({ status, vencimento, hoje }: { status: "pendente" | "pago"; vencimento: string; hoje: string }) {
   const rotulo = status === "pago" ? "Paga" : vencimento < hoje ? "Vencida" : "A pagar";
   return (
-    <span className={`rounded-sm px-2 py-0.5 text-xs font-medium ${estilos[status]}`}>{rotulo}</span>
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${estilos[status]}`}>
+      <span aria-hidden className="size-1.5 rounded-full bg-current" />
+      {rotulo}
+    </span>
   );
 }

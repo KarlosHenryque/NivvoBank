@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Check, Pencil, Trash2, Undo2, type LucideIcon } from "lucide-react";
+import { Check, Pencil, Plus, Trash2, Undo2, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ValorOculto } from "@/components/dashboard/valor-oculto";
 import { EstadoVazio } from "@/components/estado-vazio";
@@ -90,14 +90,14 @@ export function LancamentosView({
     l.tipo === "despesa" ? <StatusTag status={l.status} vencimento={l.data_vencimento} hoje={hojeStr} /> : null;
 
   const valor = (l: Lancamento) => (
-    <span className="font-semibold">
+    <span className={`num font-semibold ${l.tipo === "receita" ? "text-positivo" : ""}`}>
       {l.tipo === "despesa" ? "−" : "+"}
       {brl(l.valor)}
     </span>
   );
 
   const acoes = (l: Lancamento) => (
-    <div className="flex items-center justify-center gap-1">
+    <div className="flex items-center justify-end gap-0.5">
       {l.tipo === "receita" ? null : l.status === "pago" ? (
         <IconBtn icone={Undo2} rotulo="Desfazer" disabled={pending} onClick={() => executar(() => pagarLancamento(l.id, null), "Pagamento desfeito", false)} />
       ) : (
@@ -146,8 +146,9 @@ export function LancamentosView({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Lançamentos</h1>
+        <h1 className="text-3xl font-semibold">Lançamentos</h1>
         <Button size="lg" className="h-10" onClick={() => setModo({ tipo: "form", item: null })}>
+          <Plus data-icon="inline-start" />
           Novo lançamento
         </Button>
       </div>
@@ -159,9 +160,9 @@ export function LancamentosView({
           t.rotulo === "Receitas" ? (
             <ValorOculto key={t.rotulo} rotulo={t.rotulo} valor={brl(t.v)} valorClassName="text-sm sm:text-xl" />
           ) : (
-            <div key={t.rotulo} className="rounded-xl border bg-card p-4 sm:p-6">
+            <div key={t.rotulo} className="rounded-xl border bg-card p-4 sm:p-5">
               <p className="text-xs text-muted-foreground">{t.rotulo}</p>
-              <p className="text-sm font-semibold sm:text-xl">{brl(t.v)}</p>
+              <p className={`num text-sm font-semibold sm:text-xl ${t.rotulo === "Saldo" && t.v < 0 ? "text-destructive" : ""}`}>{brl(t.v)}</p>
             </div>
           ),
         )}
@@ -175,43 +176,43 @@ export function LancamentosView({
         <>
           <ul className="flex flex-col gap-2 md:hidden">
             {lancamentos.map((l) => (
-              <li key={l.id} onClick={() => abrirParcelas(l)} className={`flex flex-col gap-3 rounded-xl border bg-card p-4 ${clicavel(l)}`}>
-                <div className="flex items-start justify-between gap-2">
+              <li key={l.id} onClick={() => abrirParcelas(l)} className={`flex flex-col gap-2 rounded-xl border border-l-4 bg-card p-4 pb-2 active:bg-muted/50 ${clicavel(l)}`} style={{ borderLeftColor: cat(l.categoria_id)?.cor }}>
+                <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">{detalhes(l)}</div>
+                  <div className="text-base">{valor(l)}</div>
+                </div>
+                <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                  <span>
+                    Vence {dataBR(l.data_vencimento)}
+                    {l.tipo === "despesa" && l.data_pagamento && `, pago ${dataBR(l.data_pagamento)}`}
+                  </span>
                   {badge(l)}
                 </div>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex flex-col text-xs text-muted-foreground">
-                    <span>Vence {dataBR(l.data_vencimento)}</span>
-                    {l.tipo === "despesa" && l.data_pagamento && <span>Pago {dataBR(l.data_pagamento)}</span>}
-                  </div>
-                  {valor(l)}
-                </div>
-                {acoes(l)}
+                <div className="-mx-2 border-t pt-1">{acoes(l)}</div>
               </li>
             ))}
           </ul>
 
           <div className="hidden overflow-x-auto rounded-xl border bg-card md:block">
-            <table className="w-full text-center text-sm">
-              <thead className="border-b text-center text-xs text-muted-foreground">
+            <table className="w-full text-sm">
+              <thead className="border-b bg-muted/40 text-left text-xs text-muted-foreground">
                 <tr>
                   <th className="p-3 font-medium">Descrição</th>
                   <th className="p-3 font-medium">Vencimento</th>
                   <th className="p-3 font-medium">Pagamento</th>
-                  <th className="p-3 font-medium">Valor</th>
+                  <th className="p-3 text-right font-medium">Valor</th>
                   <th className="p-3 font-medium">Status</th>
-                  <th className="p-3" />
+                  <th className="w-36 p-3" />
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {lancamentos.map((l) => (
-                  <tr key={l.id} onClick={() => abrirParcelas(l)} className={clicavel(l)}>
-                    <td className="max-w-64 p-3 [&_p]:justify-center">{detalhes(l)}</td>
-                    <td className="p-3">{dataBR(l.data_vencimento)}</td>
-                    <td className="p-3">{l.tipo === "despesa" && l.data_pagamento ? dataBR(l.data_pagamento) : "—"}</td>
-                    <td className="p-3">{valor(l)}</td>
-                    <td className="p-3"><div className="flex justify-center">{badge(l) ?? "—"}</div></td>
+                  <tr key={l.id} onClick={() => abrirParcelas(l)} className={`transition-colors hover:bg-muted/40 ${clicavel(l)}`}>
+                    <td className="max-w-72 p-3">{detalhes(l)}</td>
+                    <td className="num p-3">{dataBR(l.data_vencimento)}</td>
+                    <td className="num p-3">{l.tipo === "despesa" && l.data_pagamento ? dataBR(l.data_pagamento) : "—"}</td>
+                    <td className="p-3 text-right">{valor(l)}</td>
+                    <td className="p-3">{badge(l) ?? "—"}</td>
                     <td className="p-3">{acoes(l)}</td>
                   </tr>
                 ))}
